@@ -28,10 +28,58 @@ listContainer.addEventListener(
   },
   false
 );
+let draggedItem = null;
+
+listContainer.addEventListener("dragstart", function (e) {
+  if (e.target.tagName === "LI") {
+    draggedItem = e.target;
+    setTimeout(() => (e.target.style.display = "none"), 0);
+  }
+});
+
+listContainer.addEventListener("dragend", function (e) {
+  if (draggedItem) {
+    draggedItem.style.display = "";
+    draggedItem = null;
+    saveData();
+  }
+});
+
+listContainer.addEventListener("dragover", function (e) {
+  e.preventDefault();
+  const afterElement = getDragAfterElement(listContainer, e.clientY);
+  if (afterElement == null) {
+    listContainer.appendChild(draggedItem);
+  } else {
+    listContainer.insertBefore(draggedItem, afterElement);
+  }
+});
+
+function getDragAfterElement(container, y) {
+  const draggableElements = [
+    ...container.querySelectorAll("li:not([style*='display: none'])"),
+  ];
+  return draggableElements.reduce(
+    (closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      } else {
+        return closest;
+      }
+    },
+    { offset: -Infinity }
+  ).element;
+}
+
 function saveData() {
   localStorage.setItem("data", listContainer.innerHTML);
 }
 function showTasks() {
   listContainer.innerHTML = localStorage.getItem("data");
+  listContainer
+    .querySelectorAll("li")
+    .forEach((li) => li.setAttribute("draggable", "true"));
 }
 showTasks();
