@@ -1,85 +1,75 @@
-const inputBox = document.getElementById("input-box");
-const listContainer = document.getElementById("list-container");
-function addTask() {
-  if (inputBox.value === "") {
-    alert("You must enter a task!");
-  } else {
-    let li = document.createElement("li");
-    li.innerHTML = inputBox.value;
-    listContainer.appendChild(li);
-    let span = document.createElement("span");
-    span.innerHTML = "\u00d7";
-    li.appendChild(span);
-  }
-  inputBox.value = "";
-  saveData();
-}
+const taskForm = document.getElementById("task-form");
+const taskInput = document.getElementById("task-input");
+const taskList = document.getElementById("task-list");
 
-listContainer.addEventListener(
-  "click",
-  function (e) {
-    if (e.target.tagName === "LI") {
-      e.target.classList.toggle("checked");
-      saveData();
-    } else if (e.target.tagName === "SPAN") {
-      e.target.parentElement.remove();
-      saveData();
+const tasks = [];
+
+function renderTasks() {
+  taskList.innerHTML = "";
+
+  tasks.forEach((task, index) => {
+    const listItem = document.createElement("li");
+    listItem.className = "task-item";
+
+    const label = document.createElement("label");
+    label.className = "task-item__label";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "task-item__checkbox";
+    checkbox.checked = task.completed;
+    checkbox.addEventListener("change", () => toggleTask(index));
+
+    const text = document.createElement("p");
+    text.className = "task-item__text";
+    text.textContent = task.text;
+
+    if (task.completed) {
+      text.classList.add("task-item__text--completed");
     }
-  },
-  false
-);
-let draggedItem = null;
 
-listContainer.addEventListener("dragstart", function (e) {
-  if (e.target.tagName === "LI") {
-    draggedItem = e.target;
-    setTimeout(() => (e.target.style.display = "none"), 0);
-  }
-});
+    label.appendChild(checkbox);
+    label.appendChild(text);
 
-listContainer.addEventListener("dragend", function (e) {
-  if (draggedItem) {
-    draggedItem.style.display = "";
-    draggedItem = null;
-    saveData();
-  }
-});
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "task-item__delete";
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", () => deleteTask(index));
 
-listContainer.addEventListener("dragover", function (e) {
-  e.preventDefault();
-  const afterElement = getDragAfterElement(listContainer, e.clientY);
-  if (afterElement == null) {
-    listContainer.appendChild(draggedItem);
-  } else {
-    listContainer.insertBefore(draggedItem, afterElement);
-  }
-});
-
-function getDragAfterElement(container, y) {
-  const draggableElements = [
-    ...container.querySelectorAll("li:not([style*='display: none'])"),
-  ];
-  return draggableElements.reduce(
-    (closest, child) => {
-      const box = child.getBoundingClientRect();
-      const offset = y - box.top - box.height / 2;
-      if (offset < 0 && offset > closest.offset) {
-        return { offset: offset, element: child };
-      } else {
-        return closest;
-      }
-    },
-    { offset: -Infinity }
-  ).element;
+    listItem.appendChild(label);
+    listItem.appendChild(deleteButton);
+    taskList.appendChild(listItem);
+  });
 }
 
-function saveData() {
-  localStorage.setItem("data", listContainer.innerHTML);
+function addTask(text) {
+  tasks.push({ text, completed: false });
+  renderTasks();
 }
-function showTasks() {
-  listContainer.innerHTML = localStorage.getItem("data");
-  listContainer
-    .querySelectorAll("li")
-    .forEach((li) => li.setAttribute("draggable", "true"));
+
+function toggleTask(index) {
+  tasks[index].completed = !tasks[index].completed;
+  renderTasks();
 }
-showTasks();
+
+function deleteTask(index) {
+  tasks.splice(index, 1);
+  renderTasks();
+}
+
+taskForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const value = taskInput.value.trim();
+
+  if (!value) {
+    taskInput.focus();
+    return;
+  }
+
+  addTask(value);
+  taskInput.value = "";
+  taskInput.focus();
+});
+
+renderTasks();

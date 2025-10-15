@@ -3,24 +3,38 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Todo List App</title>
+    <title>Todo List</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="container">
-      <div class="todo-app">
-        <h2>To Do List <img src="img/download.png" alt="" /></h2>
-        <div class="row">
-          <input type="text" id="input-box" placeholder="Add a new task..." />
-          <button onclick="addTask()">Add</button>
+    <main class="app">
+      <header class="app__header">
+        <h1 class="app__title">Todo List</h1>
+        <p class="app__subtitle">Keep track of the things you need to get done.</p>
+      </header>
+
+      <form class="task-form" id="task-form">
+        <label class="task-form__label" for="task-input">Add a task</label>
+        <div class="task-form__controls">
+          <input
+            id="task-input"
+            class="task-form__input"
+            type="text"
+            name="task"
+            placeholder="e.g. Buy groceries"
+            autocomplete="off"
+            required
+          />
+          <button class="task-form__button" type="submit">Add</button>
         </div>
-        <ul id="list-container">
-          <!-- <li class="checked">Task 1</li>
-                <li>Task 2</li>
-                <li>Task 3</li> -->
-        </ul>
-      </div>
-    </div>
+      </form>
+
+      <section class="task-list" aria-live="polite">
+        <h2 class="task-list__title">Tasks</h2>
+        <ul class="task-list__items" id="task-list"></ul>
+      </section>
+    </main>
+
     <script src="script.js"></script>
   </body>
 </html>
